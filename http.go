@@ -16,6 +16,7 @@ const defaultReplicas = 50
 
 type HTTPPool struct {
 	//peer's base URL
+	///<selfpath><basepath>/<groupname>/<key> required
 	selfPath    string
 	basePath    string
 	mu          sync.Mutex
