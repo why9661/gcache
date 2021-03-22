@@ -16,7 +16,7 @@ type Getter interface {
 type GetterFunc func(key string) ([]byte, error)
 
 func (f GetterFunc) Get(key string) ([]byte, error) {
-	return f.Get(key)
+	return f(key)
 }
 
 type Group struct {
