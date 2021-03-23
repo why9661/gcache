@@ -91,7 +91,7 @@ func (g *Group) load(key string) (value ByteView, err error) {
 	if err == nil {
 		return view.(ByteView), nil
 	}
-	return
+	return ByteView{}, err
 }
 
 func (g *Group) getFromPeer(peer PeerGetter, key string) (ByteView, error) {
