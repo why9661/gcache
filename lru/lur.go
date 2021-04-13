@@ -35,9 +35,9 @@ func (l *Lru) Get(key string) (value Value, ok bool) {
 		return
 	}
 	if ele, ok := l.cache[key]; ok {
-		v := ele.Value.(*entry).value
+		value = ele.Value.(*entry).value
 		l.queue.MoveToFront(ele)
-		return v, true
+		return value, true
 	}
 	return
 }

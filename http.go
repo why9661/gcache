@@ -16,7 +16,7 @@ const defaultReplicas = 50
 
 type HTTPPool struct {
 	//peer's base URL
-	///<selfpath><basepath>/<groupname>/<key> required
+	// eg: http://localhost:8001
 	selfPath    string
 	basePath    string
 	mu          sync.Mutex
@@ -90,10 +90,12 @@ func (p *HTTPPool) PickPeer(key string) (PeerGetter, bool) {
 var _ PeerPicker = (*HTTPPool)(nil)
 
 type httpGetter struct {
+	//eg: http://localhost:8001
 	baseURL string
 }
 
 func (h *httpGetter) Get(group string, key string) ([]byte, error) {
+	//eg: http://localhost:8001/_cache/scores/why
 	u := fmt.Sprintf("%v%v/%v", h.baseURL, url.QueryEscape(group), url.QueryEscape(key))
 	res, err := http.Get(u)
 	if err != nil {

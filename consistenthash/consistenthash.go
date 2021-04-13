@@ -6,11 +6,12 @@ import (
 	"strconv"
 )
 
+// Hash Function used in consistenthash.
 type Hash func([]byte) uint32
 
 type Map struct {
 	hash     Hash
-	replicas int
+	replicas int //
 	keys     []int
 	hashMap  map[int]string
 }
@@ -50,5 +51,5 @@ func (m *Map) Get(key string) string {
 		return m.keys[i] >= hash
 	})
 
-	return m.hashMap[m.keys[index]]
+	return m.hashMap[m.keys[index%len(m.keys)]]
 }

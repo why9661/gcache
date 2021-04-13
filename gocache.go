@@ -21,8 +21,8 @@ func (f GetterFunc) Get(key string) ([]byte, error) {
 
 type Group struct {
 	name      string
-	getter    Getter
 	mainCache cache
+	getter    Getter
 	peers     PeerPicker
 	//use singleflight.Group to make sure that each key is only fetched once
 	loader *singleflight.Group
