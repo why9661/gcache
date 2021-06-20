@@ -15,10 +15,8 @@ const defaultBasePath = "/_cache/"
 const defaultReplicas = 50
 
 type HTTPPool struct {
-	//peer's base URL
-	// eg: http://localhost:8001
-	selfPath    string
-	basePath    string
+	basePath    string // default: /_cache/
+	selfPath    string // eg: localhost:8000
 	mu          sync.Mutex
 	peers       *consistenthash.Map
 	httpGetters map[string]*httpGetter
@@ -38,7 +36,7 @@ func (p *HTTPPool) Log(format string, v ...interface{}) {
 
 func (p *HTTPPool) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 	if !strings.HasPrefix(r.URL.Path, p.basePath) {
-		log.Println("HTTPPool serving unexpected path: " + r.URL.Path)
+		panic("HTTPPool serving unexpected path: " + r.URL.Path)
 	}
 	p.Log("%s %s", r.Method, r.URL.Path)
 	// /<basepath>/<groupname>/<key> required
