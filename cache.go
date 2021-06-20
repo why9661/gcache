@@ -2,7 +2,6 @@ package gocache
 
 import (
 	"github.com/why9661/gocache/lru"
-	"log"
 	"sync"
 )
 
@@ -32,16 +31,4 @@ func (c *cache) get(key string) (value ByteView, ok bool) {
 		return v.(ByteView), ok
 	}
 	return
-}
-
-func (c *cache) delete(key string) {
-	c.mu.Lock()
-	defer c.mu.Unlock()
-
-	if _, ok := c.lru.Get(key); !ok {
-		log.Printf("Key: %v dose not exist", key)
-	} else {
-		c.lru.Remove(key)
-	}
-
 }
