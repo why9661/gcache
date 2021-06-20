@@ -20,7 +20,7 @@ func (f GetterFunc) Get(key string) ([]byte, error) {
 }
 
 type Group struct {
-	name      string
+	name      string //namespace
 	mainCache cache
 	getter    Getter
 	peers     PeerPicker
@@ -58,6 +58,14 @@ func GetGroup(name string) *Group {
 	g := groups[name]
 	mu.RUnlock()
 	return g
+}
+
+func (g *Group) Add(key string, value ByteView) {
+	g.mainCache.add(key, value)
+}
+
+func (g *Group) Delete(key string) {
+	g.mainCache.delete(key)
 }
 
 //Get value for a key from cache
