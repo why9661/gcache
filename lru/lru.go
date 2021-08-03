@@ -4,7 +4,7 @@ import "container/list"
 
 type Lru struct {
 	mBytes int64
-	nbytes int64
+	nBytes int64
 	queue  *list.List
 	cache  map[string]*list.Element
 	//callback function executed when an entry is purged
@@ -42,21 +42,21 @@ func (l *Lru) Get(key string) (value Value, ok bool) {
 	return
 }
 
-//Remove removes key's value from the cache
+// Remove removes a key-value pair from the cache
 func (l *Lru) Remove(key string) {
 	if l.cache == nil {
 		return
 	}
 	if ele, ok := l.cache[key]; ok {
-		l.RemoveElement(ele)
+		l.removeElement(ele)
 	}
 }
 
-func (l *Lru) RemoveElement(ele *list.Element) {
+func (l *Lru) removeElement(ele *list.Element) {
 	e := ele.Value.(*entry)
 	delete(l.cache, e.key)
 	l.queue.Remove(ele)
-	l.nbytes -= int64(len(e.key)) + int64(e.value.Len())
+	l.nBytes -= int64(len(e.key)) + int64(e.value.Len())
 	if l.OnEvicted != nil {
 		l.OnEvicted(e.key, e.value)
 	}
@@ -69,26 +69,26 @@ func (l *Lru) RemoveOldest() {
 		e := ele.Value.(*entry)
 		delete(l.cache, e.key)
 		l.queue.Remove(ele)
-		l.nbytes -= int64(len(e.key)) + int64(e.value.Len())
+		l.nBytes -= int64(len(e.key)) + int64(e.value.Len())
 		if l.OnEvicted != nil {
 			l.OnEvicted(e.key, e.value)
 		}
 	}
 }
 
-//Add adds a value to the cache (or update the provided key's value)
+//Add adds a key-value pair to the cache (or update the provided key's value)
 func (l *Lru) Add(key string, value Value) {
 	if ele, ok := l.cache[key]; ok {
 		l.queue.MoveToFront(ele)
 		e := ele.Value.(*entry)
-		l.nbytes += int64(value.Len()) - int64(e.value.Len())
+		l.nBytes += int64(value.Len()) - int64(e.value.Len())
 		e.value = value
 	} else {
 		ele := l.queue.PushFront(&entry{key: key, value: value})
 		l.cache[key] = ele
-		l.nbytes += int64(len(key)) + int64(value.Len())
+		l.nBytes += int64(len(key)) + int64(value.Len())
 	}
-	for l.nbytes > l.mBytes {
+	for l.nBytes > l.mBytes {
 		l.RemoveOldest()
 	}
 }
