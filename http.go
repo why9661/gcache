@@ -2,7 +2,7 @@ package gocache
 
 import (
 	"fmt"
-	"github.com/why9661/gocache/consistenthash"
+	"github.com/why9661/gcache/consistenthash"
 	"io/ioutil"
 	"log"
 	"net/http"

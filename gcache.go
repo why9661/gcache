@@ -2,7 +2,7 @@ package gocache
 
 import (
 	"fmt"
-	"github.com/why9661/gocache/singleflight"
+	"github.com/why9661/gcache/singleflight"
 	"log"
 	"sync"
 )

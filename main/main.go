@@ -3,7 +3,7 @@ package main
 import (
 	"flag"
 	"fmt"
-	"github.com/why9661/gocache"
+	"github.com/why9661/gcache"
 	"log"
 	"net/http"
 )
