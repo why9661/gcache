@@ -1,4 +1,4 @@
-package gocache
+package gcache
 
 //PeerGetter is the interface that must be implemented by a peer.
 type PeerGetter interface {

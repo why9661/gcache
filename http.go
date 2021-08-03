@@ -1,4 +1,4 @@
-package gocache
+package gcache
 
 import (
 	"fmt"
@@ -11,14 +11,14 @@ import (
 	"sync"
 )
 
-const defaultBasePath = "/_cache/"
+const defaultBasePath = "/_gcache/"
 const defaultReplicas = 50
 
 type HTTPPool struct {
 	basePath    string // default: /_cache/
 	selfPath    string // eg: localhost:8000
 	mu          sync.Mutex
-	peers       *consistenthash.Map
+	peers       *consistenthash.CHash
 	httpGetters map[string]*httpGetter
 }
 
@@ -59,7 +59,7 @@ func (p *HTTPPool) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 		http.Error(w, err.Error(), http.StatusInternalServerError)
 		return
 	}
-	w.Header().Set("Content-Type", "application/octet-stream")
+	w.Header().Set("Content-Type", "text/plain")
 	w.Write(value.ByteSlice())
 }
 

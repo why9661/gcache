@@ -1,4 +1,4 @@
-package gocache
+package gcache
 
 import (
 	"fmt"
@@ -12,7 +12,7 @@ type Getter interface {
 	Get(key string) ([]byte, error)
 }
 
-//A GetterFunc implements Getter with a function
+//A GetterFunc implements Getter
 type GetterFunc func(key string) ([]byte, error)
 
 func (f GetterFunc) Get(key string) ([]byte, error) {
@@ -20,12 +20,11 @@ func (f GetterFunc) Get(key string) ([]byte, error) {
 }
 
 type Group struct {
-	name      string
+	name      string // namespace
 	mainCache cache
 	getter    Getter
 	peers     PeerPicker
-	//use singleflight.Group to make sure that each key is only fetched once
-	loader *singleflight.Group
+	loader    *singleflight.Group //use singleflight.Group to make sure that each key is only fetched once
 }
 
 var (

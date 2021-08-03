@@ -6,18 +6,17 @@ import (
 	"strconv"
 )
 
-// Hash Function used in consistenthash.
 type Hash func([]byte) uint32
 
-type Map struct {
+type CHash struct {
 	hash     Hash
-	replicas int //
+	replicas int
 	keys     []int
 	hashMap  map[int]string
 }
 
-func New(replicas int, fn Hash) *Map {
-	m := &Map{
+func New(replicas int, fn Hash) *CHash {
+	m := &CHash{
 		hash:     fn,
 		replicas: replicas,
 		hashMap:  make(map[int]string),
@@ -28,8 +27,7 @@ func New(replicas int, fn Hash) *Map {
 	return m
 }
 
-//Add adds some keys to the hash
-func (m *Map) Add(keys ...string) {
+func (m *CHash) Add(keys ...string) {
 	for _, key := range keys {
 		for i := 0; i < m.replicas; i++ {
 			hkey := int(m.hash([]byte(strconv.Itoa(i) + key)))
@@ -40,8 +38,7 @@ func (m *Map) Add(keys ...string) {
 	sort.Ints(m.keys)
 }
 
-//Get gets the closest item in the hash to the provided key
-func (m *Map) Get(key string) string {
+func (m *CHash) Get(key string) string {
 	if len(m.keys) == 0 {
 		return ""
 	}

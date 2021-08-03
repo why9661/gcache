@@ -1,4 +1,4 @@
-package gocache
+package gcache
 
 import (
 	"github.com/why9661/gcache/lru"
