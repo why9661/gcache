@@ -82,7 +82,7 @@ func (g *Group) load(key string) (value ByteView, err error) {
 				if value, err = g.getFromPeer(peer, key); err == nil {
 					return value, nil
 				}
-				log.Println("[gocache] Failed to get from peer", err)
+				log.Println("[gcache] Failed to get from peer", err)
 			}
 		}
 		return g.getLocally(key)
@@ -90,7 +90,7 @@ func (g *Group) load(key string) (value ByteView, err error) {
 	if err == nil {
 		return view.(ByteView), nil
 	}
-	return ByteView{}, err
+	return
 }
 
 func (g *Group) getFromPeer(peer PeerGetter, key string) (ByteView, error) {

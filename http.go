@@ -63,11 +63,13 @@ func (p *HTTPPool) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 	w.Write(value.ByteSlice())
 }
 
-//Set updates the pool's list of peers
+// Set updates the pool's list of peers
 func (p *HTTPPool) Set(peers ...string) {
 	p.mu.Lock()
 	defer p.mu.Unlock()
-	p.peers = consistenthash.New(defaultReplicas, nil)
+	if p.peers == nil {
+		p.peers = consistenthash.New(defaultReplicas, nil)
+	}
 	p.peers.Add(peers...)
 	p.httpGetters = make(map[string]*httpGetter, len(peers))
 	for _, peer := range peers {
@@ -88,12 +90,12 @@ func (p *HTTPPool) PickPeer(key string) (PeerGetter, bool) {
 var _ PeerPicker = (*HTTPPool)(nil)
 
 type httpGetter struct {
-	//eg: http://localhost:8001
+	// eg:http://localhost:8001/_cache/
 	baseURL string
 }
 
 func (h *httpGetter) Get(group string, key string) ([]byte, error) {
-	//eg: http://localhost:8001/_cache/scores/why
+	// eg: http://localhost:8001/_cache/scores/why
 	u := fmt.Sprintf("%v%v/%v", h.baseURL, url.QueryEscape(group), url.QueryEscape(key))
 	res, err := http.Get(u)
 	if err != nil {
