@@ -8,7 +8,7 @@ type Lru struct {
 	queue  *list.List
 	cache  map[string]*list.Element
 	//callback function executed when an entry is purged
-	OnEvicted func(key string, value Value)
+	onEvicted func(key string, value Value)
 }
 
 type entry struct {
@@ -25,7 +25,7 @@ func New(mBytes int64, onEvicted func(string, Value)) *Lru {
 		mBytes:    mBytes,
 		queue:     list.New(),
 		cache:     make(map[string]*list.Element),
-		OnEvicted: onEvicted,
+		onEvicted: onEvicted,
 	}
 }
 
@@ -57,8 +57,8 @@ func (l *Lru) removeElement(ele *list.Element) {
 	delete(l.cache, e.key)
 	l.queue.Remove(ele)
 	l.nBytes -= int64(len(e.key)) + int64(e.value.Len())
-	if l.OnEvicted != nil {
-		l.OnEvicted(e.key, e.value)
+	if l.onEvicted != nil {
+		l.onEvicted(e.key, e.value)
 	}
 }
 
@@ -70,13 +70,13 @@ func (l *Lru) RemoveOldest() {
 		delete(l.cache, e.key)
 		l.queue.Remove(ele)
 		l.nBytes -= int64(len(e.key)) + int64(e.value.Len())
-		if l.OnEvicted != nil {
-			l.OnEvicted(e.key, e.value)
+		if l.onEvicted != nil {
+			l.onEvicted(e.key, e.value)
 		}
 	}
 }
 
-//Add adds a key-value pair to the cache (or update the provided key's value)
+//Add adds an item to the cache (or update the value by the given key)
 func (l *Lru) Add(key string, value Value) {
 	if ele, ok := l.cache[key]; ok {
 		l.queue.MoveToFront(ele)

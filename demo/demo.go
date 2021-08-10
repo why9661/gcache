@@ -66,7 +66,7 @@ func main() {
 		if v, ok := db[key]; ok {
 			return []byte(v), nil
 		}
-		return nil, fmt.Errorf("No such key: %s\n", key)
+		return nil, fmt.Errorf("No such key in db: %s\n", key)
 	}))
 
 	if api {

@@ -8,7 +8,7 @@ import (
 	"sync"
 )
 
-//A Getter loads data for a key
+//A Getter loads data by a key
 type Getter interface {
 	Get(key string) ([]byte, error)
 }
@@ -60,7 +60,7 @@ func GetGroup(name string) *Group {
 	return g
 }
 
-//Get value for a key from cache
+//Get value by given key from cache
 func (g *Group) Get(key string) (ByteView, error) {
 	if key == "" {
 		return ByteView{}, fmt.Errorf("kei is required")
@@ -79,8 +79,8 @@ func (g *Group) load(key string) (value ByteView, err error) {
 	//each key is only fetched once (either locally or remotely) regardless of the number of concurrent callers.
 	view, err := g.loader.Do(key, func() (interface{}, error) {
 		if g.peers != nil {
-			if peer, ok := g.peers.PickPeer(key); ok {
-				if value, err = g.getFromPeer(peer, key); err == nil {
+			if peerGetter, ok := g.peers.PickPeer(key); ok {
+				if value, err = g.getFromPeer(peerGetter, key); err == nil {
 					return value, nil
 				}
 				log.Println("[gcache] Failed to get from peer", err)
@@ -112,7 +112,7 @@ func (g *Group) getLocally(key string) (ByteView, error) {
 	if err != nil {
 		return ByteView{}, err
 	}
-	value := ByteView{b: bytes}
+	value := ByteView{b: cloneBytes(bytes)}
 	g.populateCache(key, value)
 	return value, nil
 }
