@@ -1,7 +1,7 @@
 package gcache
 
 import (
-	pb "github.com/why9661/gcache/pb"
+	"github.com/why9661/gcache/pb"
 )
 
 //PeerGetter is the interface that must be implemented by a peer.

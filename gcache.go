@@ -2,7 +2,7 @@ package gcache
 
 import (
 	"fmt"
-	pb "github.com/why9661/gcache/pb"
+	"github.com/why9661/gcache/pb"
 	"github.com/why9661/gcache/singleflight"
 	"log"
 	"sync"

@@ -4,7 +4,7 @@ import (
 	"fmt"
 	"github.com/golang/protobuf/proto"
 	"github.com/why9661/gcache/consistenthash"
-	pb "github.com/why9661/gcache/pb"
+	"github.com/why9661/gcache/pb"
 	"io/ioutil"
 	"log"
 	"net/http"
