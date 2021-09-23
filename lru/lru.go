@@ -2,13 +2,17 @@ package lru
 
 import "container/list"
 
-type Lru struct {
+type Cache struct {
 	mBytes int64
 	nBytes int64
 	queue  *list.List
 	cache  map[string]*list.Element
-	//callback function executed when an entry is purged
+	// callback function executed when an entry is purged
 	onEvicted func(key string, value Value)
+}
+
+type Value interface {
+	Len() int
 }
 
 type entry struct {
@@ -16,12 +20,8 @@ type entry struct {
 	value Value
 }
 
-type Value interface {
-	Len() int
-}
-
-func New(mBytes int64, onEvicted func(string, Value)) *Lru {
-	return &Lru{
+func New(mBytes int64, onEvicted func(string, Value)) *Cache {
+	return &Cache{
 		mBytes:    mBytes,
 		queue:     list.New(),
 		cache:     make(map[string]*list.Element),
@@ -30,70 +30,70 @@ func New(mBytes int64, onEvicted func(string, Value)) *Lru {
 }
 
 // Get looks up a key's value from the cache
-func (l *Lru) Get(key string) (value Value, ok bool) {
-	if l.cache == nil {
+func (c *Cache) Get(key string) (value Value, ok bool) {
+	if c.cache == nil {
 		return
 	}
-	if ele, ok := l.cache[key]; ok {
+	if ele, ok := c.cache[key]; ok {
 		value = ele.Value.(*entry).value
-		l.queue.MoveToFront(ele)
+		c.queue.MoveToFront(ele)
 		return value, true
 	}
 	return
 }
 
-// Remove removes a key-value pair from the cache
-func (l *Lru) Remove(key string) {
-	if l.cache == nil {
+// Remove removes an item from the cache
+func (c *Cache) Remove(key string) {
+	if c.cache == nil {
 		return
 	}
-	if ele, ok := l.cache[key]; ok {
-		l.removeElement(ele)
+	if ele, ok := c.cache[key]; ok {
+		c.removeElement(ele)
 	}
 }
 
-func (l *Lru) removeElement(ele *list.Element) {
+func (c *Cache) removeElement(ele *list.Element) {
 	e := ele.Value.(*entry)
-	delete(l.cache, e.key)
-	l.queue.Remove(ele)
-	l.nBytes -= int64(len(e.key)) + int64(e.value.Len())
-	if l.onEvicted != nil {
-		l.onEvicted(e.key, e.value)
+	delete(c.cache, e.key)
+	c.queue.Remove(ele)
+	c.nBytes -= int64(len(e.key)) + int64(e.value.Len())
+	if c.onEvicted != nil {
+		c.onEvicted(e.key, e.value)
 	}
 }
 
-//RemoveOldest removes the oldest item from the cache
-func (l *Lru) RemoveOldest() {
-	ele := l.queue.Back()
+// RemoveOldest removes the oldest item from the cache
+func (c *Cache) RemoveOldest() {
+	ele := c.queue.Back()
 	if ele != nil {
 		e := ele.Value.(*entry)
-		delete(l.cache, e.key)
-		l.queue.Remove(ele)
-		l.nBytes -= int64(len(e.key)) + int64(e.value.Len())
-		if l.onEvicted != nil {
-			l.onEvicted(e.key, e.value)
+		delete(c.cache, e.key)
+		c.queue.Remove(ele)
+		c.nBytes -= int64(len(e.key)) + int64(e.value.Len())
+		if c.onEvicted != nil {
+			c.onEvicted(e.key, e.value)
 		}
 	}
 }
 
-//Add adds an item to the cache (or update the value by the given key)
-func (l *Lru) Add(key string, value Value) {
-	if ele, ok := l.cache[key]; ok {
-		l.queue.MoveToFront(ele)
+// Add adds an item to the cache (or update the value by the given key)
+func (c *Cache) Add(key string, value Value) {
+	if ele, ok := c.cache[key]; ok {
+		c.queue.MoveToFront(ele)
 		e := ele.Value.(*entry)
-		l.nBytes += int64(value.Len()) - int64(e.value.Len())
+		c.nBytes += int64(value.Len()) - int64(e.value.Len())
 		e.value = value
 	} else {
-		ele := l.queue.PushFront(&entry{key: key, value: value})
-		l.cache[key] = ele
-		l.nBytes += int64(len(key)) + int64(value.Len())
+		ele := c.queue.PushFront(&entry{key: key, value: value})
+		c.cache[key] = ele
+		c.nBytes += int64(len(key)) + int64(value.Len())
 	}
-	for l.nBytes > l.mBytes {
-		l.RemoveOldest()
+	for c.nBytes > c.mBytes {
+		c.RemoveOldest()
 	}
 }
 
-//Len returns the number of items in the cache
-func (l *Lru) Len() int {
-	return l.queue.Len()
+// Len returns the number of items in the cache
+func (c *Cache) Len() int {
+	return c.queue.Len()
 }

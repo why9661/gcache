@@ -39,6 +39,6 @@ func TestOnEvicted(t *testing.T) {
 	expected := []string{"k1", "k2"}
 
 	if !reflect.DeepEqual(keys, expected) {
-		t.Fatalf("OnEvicted function didn't execute.")
+		t.Fatalf("OnEvicted function failed.")
 	}
 }

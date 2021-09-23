@@ -17,21 +17,23 @@ const defaultBasePath = "/_gcache/"
 const defaultReplicas = 50
 
 type HTTPPool struct {
-	basePath    string // default: /_cache/
-	selfPath    string // eg: localhost:8000
+	// default: /_cache/
+	basePath string
+	// eg: localhost:8000
+	selfPath    string
 	mu          sync.Mutex
 	peers       *consistenthash.CHash
 	httpGetters map[string]*httpGetter
 }
 
-func NewHTTPPool(self string) *HTTPPool {
+func NewHTTPPool(path string) *HTTPPool {
 	return &HTTPPool{
-		selfPath: self,
+		selfPath: path,
 		basePath: defaultBasePath,
 	}
 }
 
-//Log info with server name
+// Log info with server name
 func (p *HTTPPool) Log(format string, v ...interface{}) {
 	log.Printf("[Server %s] %s", p.selfPath, fmt.Sprintf(format, v...))
 }
@@ -50,6 +52,7 @@ func (p *HTTPPool) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 
 	groupName := parts[0]
 	key := parts[1]
+
 	group := GetGroup(groupName)
 	if group == nil {
 		http.Error(w, "no such group: "+groupName, http.StatusNotFound)
@@ -57,11 +60,16 @@ func (p *HTTPPool) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 	}
 
 	view, err := group.Get(key)
+	if err != nil {
+		http.Error(w, err.Error(), http.StatusInternalServerError)
+		return
+	}
 	body, err := proto.Marshal(&pb.Response{Value: view.ByteSlice()})
 	if err != nil {
 		http.Error(w, err.Error(), http.StatusInternalServerError)
 		return
 	}
+
 	w.Header().Set("Content-Type", "text/plain")
 	w.Write(body)
 }
@@ -93,7 +101,7 @@ func (p *HTTPPool) PickPeer(key string) (PeerGetter, bool) {
 var _ PeerPicker = (*HTTPPool)(nil)
 
 type httpGetter struct {
-	// eg:http://localhost:8001/_cache/
+	// baseURL of remote peer. eg: http://localhost:8001/_gcache/
 	baseURL string
 }
 

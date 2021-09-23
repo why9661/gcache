@@ -6,16 +6,16 @@ import (
 	"strconv"
 )
 
-type Hash func([]byte) uint32
+type HashFunc func([]byte) uint32
 
 type CHash struct {
-	hash     Hash
+	hash     HashFunc
 	replicas int
 	keys     []int
 	hashMap  map[int]string
 }
 
-func New(replicas int, fn Hash) *CHash {
+func New(replicas int, fn HashFunc) *CHash {
 	m := &CHash{
 		hash:     fn,
 		replicas: replicas,
@@ -30,9 +30,9 @@ func New(replicas int, fn Hash) *CHash {
 func (m *CHash) Add(keys ...string) {
 	for _, key := range keys {
 		for i := 0; i < m.replicas; i++ {
-			hkey := int(m.hash([]byte(strconv.Itoa(i) + key)))
-			m.keys = append(m.keys, hkey)
-			m.hashMap[hkey] = key
+			hash := int(m.hash([]byte(strconv.Itoa(i) + key)))
+			m.keys = append(m.keys, hash)
+			m.hashMap[hash] = key
 		}
 	}
 	sort.Ints(m.keys)
